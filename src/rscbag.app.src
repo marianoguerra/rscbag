@@ -1,0 +1,14 @@
+{application, rscbag,
+ [
+  {description, "An Erlang rscbag library"},
+  {vsn, "1"},
+  {modules, [
+             rscbag
+            ]},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
