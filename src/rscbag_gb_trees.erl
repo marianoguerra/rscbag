@@ -87,8 +87,7 @@ foreach(Self, Fun) ->
     {ok, Self}.
 
 -spec stop(store()) -> ok.
-stop(Tree) ->
-    true = ets:delete(Tree),
+stop(_Tree) ->
     ok.
 
 %% private api
