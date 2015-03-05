@@ -18,6 +18,13 @@ init_per_testcase(_Test, Config) ->
     [{ets_bag, EtsBag}, {gb_bag, GbBag}|Config].
 
 end_per_testcase(_Test, Config) ->
+    EtsBag = ets_bag(Config),
+    GbBag = gb_bag(Config),
+    ok = rscbag_server:clean(EtsBag),
+    ok = rscbag_server:stop(EtsBag),
+
+    ok = rscbag_server:clean(GbBag),
+    ok = rscbag_server:stop(GbBag),
     Config.
 
 ets_bag(Config) -> proplists:get_value(ets_bag, Config).
