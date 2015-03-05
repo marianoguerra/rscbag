@@ -2,6 +2,8 @@
 -export([behaviour_info/1]).
 -export([foldl_fun_to_foreach_fun/1, foldl_fun_to_map_fun/1]).
 
+-ignore_xref([behaviour_info/1]).
+
 behaviour_info(callbacks) ->
     [{init, 1},
      {put, 3},

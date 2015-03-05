@@ -2,10 +2,23 @@
 
 -export([init/1, get/2, get/3, remove/2, remove_by_val/2]).
 
+-ignore_xref([init/1, get/2, get/3, remove/2, remove_by_val/2]).
+
 -record(state, {resource_handler, kv, kv_mod}).
+
+-type state() :: #state{}.
+-type resource_opts() :: term().
+-type key() :: term().
+-type val() :: term().
+
+-type opts() :: [opt()].
+-type opt() ::  {resource_handler, term()} |
+                {kv_mod, atom()} |
+                {kv_mod_opts, [any()]}.
 
 %% API
 
+-spec init(opts()) -> {ok, state()}.
 init(Opts) ->
     {resource_handler, ResourceHandler} = proplists:lookup(resource_handler, Opts),
     KvMod = proplists:get_value(kv_mod, Opts, rscbag_ets),
@@ -31,6 +44,7 @@ get(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key, ROpts) ->
             end
     end.
 
+-spec remove(state(), key()) -> {ok, state()} | {error, notfound, state()}.
 remove(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key) ->
     case KvMod:get(Kv, Key) of
         {ok, Val} ->
@@ -41,6 +55,7 @@ remove(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key) ->
             {error, notfound, State}
     end.
 
+-spec remove_by_val(state(), val()) -> {ok, state()} | {error, notfound, state()}.
 remove_by_val(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Val) ->
     case KvMod:remove_by_val(Kv, Val) of
         {ok, Kv1} ->

@@ -86,7 +86,7 @@ foreach(Self, Fun) ->
     {ok, Self, _Result} = foldl(Self, WrappedFun, ok),
     {ok, Self}.
 
--spec stop(store()) -> ok | {error, reason()}.
+-spec stop(store()) -> ok.
 stop(Tree) ->
     true = ets:delete(Tree),
     ok.
