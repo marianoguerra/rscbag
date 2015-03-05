@@ -71,7 +71,7 @@ foldl(Tree, Fun, {{val, _ValK}, _Val, Iter}, State) ->
 
 foldl(Tree, Fun, {{key, Key}, Val, Iter}, State) ->
     State1 = Fun(Key, Val, State),
-    Next = ets:next(Tree, Iter),
+    Next = gb_trees:next(Iter),
     foldl(Tree, Fun, Next, State1).
 
 -spec map(store(), map_fun()) -> {ok, store(), [term()]}.

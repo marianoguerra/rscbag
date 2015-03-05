@@ -71,7 +71,7 @@ foldl(Ref, Fun, Key={val, _Val}, State) ->
     foldl(Ref, Fun, NextKey, State);
 
 foldl(Ref, Fun, WholeKey={key, Key}, State) ->
-    {value, Val} = get(Ref, Key),
+    {ok, Val} = get(Ref, Key),
     State1 = Fun(Key, Val, State),
     NextKey = ets:next(Ref, WholeKey),
     foldl(Ref, Fun, NextKey, State1).

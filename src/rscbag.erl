@@ -30,9 +30,12 @@ init(Opts) ->
 get(State, Key) ->
     get(State, Key, []).
 
+-spec get(state(), key(), resource_opts()) -> {ok, found, val()} |
+                                               {ok, created, val()} |
+                                               {error, term(), state()}.
 get(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key, ROpts) ->
     case KvMod:get(Kv, Key) of
-        {ok, Val} -> {reply, {ok, found, Val}, State};
+        {ok, Val} -> {{ok, found, Val}, State};
         notfound ->
             case RHandler:init(ROpts) of
                 {ok, Resource} ->
