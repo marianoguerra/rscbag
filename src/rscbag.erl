@@ -1,8 +1,10 @@
 -module(rscbag).
 
--export([init/1, get/2, get/3, get_existing/2, remove/2, remove_by_val/2, clean/1, stop/1]).
+-export([init/1, get/2, get/3, get_existing/2, remove/2, remove_by_val/2,
+         remove_by_val/3, clean/1, stop/1]).
 
--ignore_xref([init/1, get/2, get/3, remove/2, remove_by_val/2, get_existing/2]).
+-ignore_xref([init/1, get/2, get/3, remove/2, remove_by_val/2,
+              remove_by_val/3, get_existing/2]).
 
 -record(state, {resource_handler, kv, kv_mod, kv_opts}).
 
@@ -68,10 +70,16 @@ remove(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key) ->
     end.
 
 -spec remove_by_val(state(), val()) -> {ok, state()} | {{error, notfound}, state()}.
-remove_by_val(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Val) ->
+remove_by_val(State, Val) ->
+    remove_by_val(State, Val, true).
+
+-spec remove_by_val(state(), val(), boolean()) -> {ok, state()} | {{error, notfound}, state()}.
+remove_by_val(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Val, CallStop) ->
     case KvMod:remove_by_val(Kv, Val) of
         {ok, Kv1} ->
-            RHandler:stop(Val),
+            if CallStop -> RHandler:stop(Val);
+               true -> ok
+            end,
             {ok, State#state{kv=Kv1}};
         notfound ->
             {{error, notfound}, State}
