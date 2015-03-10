@@ -1,8 +1,8 @@
 -module(rscbag).
 
--export([init/1, get/2, get/3, remove/2, remove_by_val/2, clean/1, stop/1]).
+-export([init/1, get/2, get/3, get_existing/2, remove/2, remove_by_val/2, clean/1, stop/1]).
 
--ignore_xref([init/1, get/2, get/3, remove/2, remove_by_val/2]).
+-ignore_xref([init/1, get/2, get/3, remove/2, remove_by_val/2, get_existing/2]).
 
 -record(state, {resource_handler, kv, kv_mod, kv_opts}).
 
@@ -46,6 +46,14 @@ get(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key, ROpts) ->
                 Other ->
                     {{error, Other}, State}
             end
+    end.
+
+-spec get_existing(state(), key()) -> {{ok, found, val()}, state()} |
+                                       {{error, notfound}, state()}.
+get_existing(State=#state{kv=Kv, kv_mod=KvMod}, Key) ->
+    case KvMod:get(Kv, Key) of
+        {ok, Val} -> {{ok, found, Val}, State};
+        notfound -> {{error, notfound}, State}
     end.
 
 -spec remove(state(), key()) -> {ok, state()} | {{error, notfound}, state()}.

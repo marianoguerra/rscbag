@@ -6,7 +6,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
          code_change/3]).
 
--ignore_xref([start_link/1, get/2, get/3, remove/2, remove_by_val/2, stop/1]).
+-ignore_xref([start_link/1, get/2, get/3, remove/2, remove_by_val/2, clean/1, stop/1]).
 
 %% API
 
