@@ -1,7 +1,7 @@
 -module(rscbag_SUITE).
 -compile(export_all).
 
-all() -> [noop, get_first_time, get_second_time, get_remove_get,
+all() -> [noop, get_first_time, get_first_time_ropts_fun, get_second_time, get_remove_get,
           get_remove_by_val_get].
 
 
@@ -21,10 +21,7 @@ end_per_testcase(_Test, Config) ->
     EtsBag = ets_bag(Config),
     GbBag = gb_bag(Config),
     ok = rscbag_server:clean(EtsBag),
-    ok = rscbag_server:stop(EtsBag),
-
     ok = rscbag_server:clean(GbBag),
-    ok = rscbag_server:stop(GbBag),
     Config.
 
 ets_bag(Config) -> proplists:get_value(ets_bag, Config).
@@ -37,10 +34,20 @@ get_first_time(Config) ->
     get_first_time_(ets_bag(Config)),
     get_first_time_(gb_bag(Config)).
 
+get_first_time_ropts_fun(Config) ->
+    get_first_time_ropts_fun_(ets_bag(Config)),
+    get_first_time_ropts_fun_(gb_bag(Config)).
+
 get_first_time_(Bag) ->
     Key = <<"foo">>,
     Opts = [{name, Key}],
     {ok, created, Opts} = rscbag_server:get(Bag, Key, Opts).
+
+get_first_time_ropts_fun_(Bag) ->
+    Key = <<"foo">>,
+    Opts = [{name, Key}],
+    ROpts = fun () -> Opts end,
+    {ok, created, Opts} = rscbag_server:get(Bag, Key, ROpts).
 
 get_second_time(Config) ->
     get_second_time_(ets_bag(Config)),

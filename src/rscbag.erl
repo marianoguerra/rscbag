@@ -9,7 +9,7 @@
 -record(state, {resource_handler, kv, kv_mod, kv_opts}).
 
 -type state() :: #state{}.
--type resource_opts() :: term().
+-type resource_opts() :: term() | fun(() -> term()).
 -type key() :: term().
 -type val() :: term().
 
@@ -40,7 +40,7 @@ get(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}, Key, ROpts) ->
     case KvMod:get(Kv, Key) of
         {ok, Val} -> {{ok, found, Val}, State};
         notfound ->
-            case RHandler:init(ROpts) of
+            case RHandler:init(force_ropts(ROpts)) of
                 {ok, Resource} ->
                     {ok, Kv1} = KvMod:put(Kv, Key, Resource),
                     State1 = State#state{kv=Kv1},
@@ -97,3 +97,8 @@ stop(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}) ->
     KvMod:foreach(Kv, fun (_Key, Val) -> RHandler:stop(Val) end),
     clean(State),
     ok.
+
+%% private functions
+
+force_ropts(ROpts) when is_function(ROpts) -> ROpts();
+force_ropts(ROpts) -> ROpts.
