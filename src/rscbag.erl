@@ -93,9 +93,8 @@ clean(State=#state{kv=Kv, kv_mod=KvMod, kv_opts=KvOpts, resource_handler=RHandle
     {ok, State#state{kv=NewKv}}.
 
 -spec stop(state()) -> ok.
-stop(State=#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}) ->
+stop(#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}) ->
     KvMod:foreach(Kv, fun (_Key, Val) -> RHandler:stop(Val) end),
-    clean(State),
     ok.
 
 %% private functions
