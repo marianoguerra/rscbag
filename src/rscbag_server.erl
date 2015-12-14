@@ -1,7 +1,8 @@
 -module(rscbag_server).
 -behaviour(gen_server).
 
--export([start_link/1, get/2, get/3, remove/2, remove_by_val/2, clean/1, stop/1]).
+-export([start_link/1, get/2, get/3, remove/2, remove_by_val/2, clean/1,
+         stop/1, foldl/3]).
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
          code_change/3]).
@@ -21,6 +22,9 @@ get(Bag, Key, Opts) ->
 
 remove(Bag, Key) ->
     gen_server:call(Bag, {remove, Key}).
+
+foldl(Bag, Fun, State0) ->
+    gen_server:call(Bag, {foldl, Fun, State0}).
 
 remove_by_val(Bag, Val) ->
     gen_server:call(Bag, {remove_by_val, Val}).
@@ -47,6 +51,10 @@ handle_call({remove, Key}, _From, State) ->
 handle_call({remove_by_val, Val}, _From, State) ->
     {Reply, NewState} = rscbag:remove_by_val(State, Val),
     {reply, Reply, NewState};
+
+handle_call({foldl, Fun, State0}, _From, State) ->
+    {Status, NewState, Result} = rscbag:foldl(State, Fun, State0),
+    {reply, {Status, Result}, NewState};
 
 handle_call(clean, _From, State) ->
     {Reply, NewState} = rscbag:clean(State),

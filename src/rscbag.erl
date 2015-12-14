@@ -1,10 +1,10 @@
 -module(rscbag).
 
 -export([init/1, get/2, get/3, get_existing/2, remove/2, remove_by_val/2,
-         remove_by_val/3, clean/1, stop/1]).
+         remove_by_val/3, clean/1, stop/1, foldl/3]).
 
 -ignore_xref([init/1, get/2, get/3, remove/2, remove_by_val/2,
-              remove_by_val/3, get_existing/2]).
+              remove_by_val/3, get_existing/2, foldl/3]).
 
 -record(state, {resource_handler, kv, kv_mod, kv_opts}).
 
@@ -17,6 +17,9 @@
 -type opt() ::  {resource_handler, term()} |
                 {kv_mod, atom()} |
                 {kv_mod_opts, [any()]}.
+
+-type foldl_fun() :: fun((key(), val(), foldl_state()) -> foldl_state()).
+-type foldl_state() :: term().
 
 %% API
 
@@ -96,6 +99,11 @@ clean(State=#state{kv=Kv, kv_mod=KvMod, kv_opts=KvOpts, resource_handler=RHandle
 stop(#state{kv=Kv, kv_mod=KvMod, resource_handler=RHandler}) ->
     KvMod:foreach(Kv, fun (_Key, Val) -> RHandler:stop(Val) end),
     ok.
+
+-spec foldl(state(), foldl_fun(), foldl_state()) -> {ok, state(), foldl_state()}.
+foldl(State=#state{kv=Kv, kv_mod=KvMod}, Fun, State0) ->
+    {ok, Kv1, Result} = KvMod:foldl(Kv, Fun, State0),
+    {ok, State#state{kv=Kv1}, Result}.
 
 %% private functions
 

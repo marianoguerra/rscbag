@@ -1,8 +1,9 @@
 -module(rscbag_SUITE).
 -compile(export_all).
 
-all() -> [noop, get_first_time, get_first_time_ropts_fun, get_second_time, get_remove_get,
-          get_remove_by_val_get].
+all() -> [noop, get_first_time, get_first_time_ropts_fun, get_second_time,
+          get_remove_get, get_remove_by_val_get,
+          foldl_empty, foldl_one, foldl_two].
 
 
 init_per_suite(Config) -> 
@@ -83,3 +84,38 @@ get_remove_by_val_get_(Bag) ->
     {ok, found, Val} = rscbag_server:get(Bag, Key, Opts),
     ok = rscbag_server:remove_by_val(Bag, Val), 
     {ok, created, Val} = rscbag_server:get(Bag, Key, Opts).
+
+foldl_empty(Config) ->
+    foldl_empty_(ets_bag(Config)),
+    foldl_empty_(gb_bag(Config)).
+
+foldl_count(_Key, _Val, Count) -> Count + 1.
+foldl_accum(Key, Val, Accum) -> [{Key, Val}|Accum].
+
+foldl_run(Bag, Items, Fun, State0) ->
+    [rscbag_server:get(Bag, Key, Opts) || {Key, Opts} <- Items],
+    rscbag_server:foldl(Bag, Fun, State0).
+
+foldl_one(Config) ->
+    foldl_one_(ets_bag(Config)),
+    foldl_one_(gb_bag(Config)).
+
+foldl_two(Config) ->
+    foldl_two_(ets_bag(Config)),
+    foldl_two_(gb_bag(Config)).
+
+
+foldl_empty_(Bag) ->
+    {ok, 0} = foldl_run(Bag, [], fun foldl_count/3, 0),
+    {ok, []} = foldl_run(Bag, [], fun foldl_accum/3, []).
+
+foldl_one_(Bag) ->
+    I1 = {<<"k1">>, [{name, <<"n1">>}]},
+    {ok, 1} = foldl_run(Bag, [I1], fun foldl_count/3, 0),
+    {ok, [I1]} = foldl_run(Bag, [I1], fun foldl_accum/3, []).
+
+foldl_two_(Bag) ->
+    I1 = {<<"k1">>, [{name, <<"n1">>}]},
+    I2 = {<<"k2">>, [{name, <<"n2">>}]},
+    {ok, 2} = foldl_run(Bag, [I1, I2], fun foldl_count/3, 0),
+    {ok, [I2, I1]} = foldl_run(Bag, [I1, I2], fun foldl_accum/3, []).
